@@ -31,7 +31,7 @@ From the repository root, use Python 3.9 or later. The reference implementation 
 
 ```sh
 python -m unittest discover -v
-python -m iteris.svg 100000005 > numeral.svg
+python -m iteris.svg --horizontal 100000005 > numeral.svg
 python -m iteris.svg --reference > docs/assets/iteris_reference.svg
 ```
 
@@ -43,4 +43,6 @@ assert [node.value for node in number.frac_nodes] == [0, 1]
 assert decode_iteris(number) == "0.00000001"
 ```
 
-![Iteris digit reference and five examples of numbers with zero blocks](docs/assets/iteris_reference.svg)
+When the glyph or layout rules change, regenerate the reference SVG and run the tests. The suite compares the checked-in chart with the renderer output. [Reference layout](docs/ITERIS_CORE_v1.0.md#horizontal-reference-layout)
+
+![Iteris digit reference, horizontal numerals, periodic decimals, and formula examples](docs/assets/iteris_reference.svg)

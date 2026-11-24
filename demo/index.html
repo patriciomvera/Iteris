@@ -113,9 +113,15 @@
     .toggle { display: flex; align-items: center; gap: .45rem; font-size: .9rem; cursor: pointer; }
     .toggle input { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--teal); }
     .stage {
+      --node-height: 100px;
+      --quadrant-width: calc(var(--node-height) / 5);
+      --node-slot-width: calc(var(--quadrant-width) * 3);
+      --overbar-offset: calc(var(--node-height) / -10);
+      --overbar-inset: calc(var(--quadrant-width) / 2);
       min-width: 0;
       min-height: 10.5rem;
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       align-items: center;
       overflow: auto hidden;
       background-color: #edf5f4;
@@ -126,26 +132,30 @@
     }
     .flow {
       display: flex;
-      gap: .375rem;
+      direction: ltr;
       align-items: center;
       width: max-content;
-      padding: .9rem 1rem;
+      padding: 1rem;
       margin-inline: auto;
     }
-    .slot { width: 3.65rem; text-align: center; flex-shrink: 0; }
-    .slot.is-token { width: 1.25rem; }
+    .slot { width: var(--node-slot-width); text-align: center; flex-shrink: 0; }
+    .slot.is-token { width: var(--quadrant-width); }
     .figure {
-      height: 6.25rem;
-      display: grid;
-      place-items: center;
+      position: relative;
+      height: var(--node-height);
+      color: var(--ink);
+    }
+    .slot:not(.is-token) .figure::before {
+      content: "";
+      position: absolute;
+      inset: -5px 3px;
       background: #f9fdfde8;
       border: 1px solid #b8cecb;
       border-radius: .42rem;
-      color: var(--ink);
     }
-    .figure svg { display: block; width: 100%; height: 100%; }
+    .figure svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
     .is-zero .figure { color: var(--teal); }
-    .is-token .figure { border: 0; background: transparent; color: var(--warm); }
+    .is-token .figure { color: var(--warm); }
     .decimal {
       display: block;
       min-height: 1.4rem;
@@ -159,14 +169,15 @@
       position: relative;
       display: flex;
       flex-shrink: 0;
-      gap: .375rem;
     }
     .period::before {
       content: "";
       position: absolute;
-      inset: -.45rem 0 auto;
-      border-top: 2px solid var(--warm);
-      border-radius: 2px;
+      inset: var(--overbar-offset) var(--overbar-inset) auto;
+      height: 2px;
+      transform: translateY(-50%);
+      background: var(--warm);
+      pointer-events: none;
     }
     .empty { color: var(--secondary); text-align: center; padding: 1.15rem; }
     .reading-key {
@@ -372,17 +383,17 @@
     }
 
     function glyph(block, label) {
-      const svg = svgElement("svg", { viewBox: "-27 -6 54 112", role: "img", "aria-label": `Bloque ${block}` });
+      const svg = svgElement("svg", { viewBox: "-30 0 60 100", role: "img", "aria-label": `Bloque ${block}` });
       svg.append(svgElement("path", { d: nodePath(block), fill: "none", stroke: "currentColor", "stroke-width": "2.4" }));
       return slot(label, svg, block === "0000" ? "is-zero" : "");
     }
 
     function separator(isPoint) {
       const label = isPoint ? "." : "−";
-      const svg = svgElement("svg", { viewBox: "-9 -50 18 100", role: "img", "aria-label": isPoint ? "Punto decimal" : "Menos" });
+      const svg = svgElement("svg", { viewBox: "-10 0 20 100", role: "img", "aria-label": isPoint ? "Punto decimal" : "Menos" });
       svg.append(isPoint
-        ? svgElement("circle", { cx: "0", cy: "0", r: "2.7", fill: "currentColor" })
-        : svgElement("path", { d: "M-6 0H6", stroke: "currentColor", "stroke-width": "2.4" }));
+        ? svgElement("circle", { cx: "0", cy: "50", r: "2.5", fill: "currentColor" })
+        : svgElement("path", { d: "M-6 50H6", stroke: "currentColor", "stroke-width": "2.4" }));
       return slot(label, svg, "is-token");
     }
 
