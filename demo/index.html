@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Demostración interactiva de la escritura horizontal de Iteris.">
+  <meta name="description" content="Demostración de la escritura horizontal de Iteris para decimales finitos y periódicos.">
   <title>Iteris · Escritura horizontal</title>
   <style>
     :root {
@@ -155,6 +155,19 @@
     }
     .is-token .decimal { color: var(--warm); }
     .flow.without-decimal .decimal { display: none; }
+    .period {
+      position: relative;
+      display: flex;
+      flex-shrink: 0;
+      gap: .375rem;
+    }
+    .period::before {
+      content: "";
+      position: absolute;
+      inset: -.45rem 0 auto;
+      border-top: 2px solid var(--warm);
+      border-radius: 2px;
+    }
     .empty { color: var(--secondary); text-align: center; padding: 1.15rem; }
     .reading-key {
       display: grid;
@@ -164,6 +177,8 @@
     }
     .reading-key p { color: var(--secondary); font-size: .875rem; }
     .key-glyph { width: 2rem; height: 2.8rem; color: var(--teal); }
+    #period-key { border-top: 1px solid var(--line); }
+    #period-key .key-glyph { color: var(--warm); }
 
     @media (max-width: 30rem) {
       .shell { width: calc(100% - 1.25rem); }
@@ -190,15 +205,18 @@
       <div class="controls">
         <label for="decimal-input" class="input-label">Número decimal</label>
         <input id="decimal-input" class="number-input" type="text" value="1200000034"
-               inputmode="decimal" autocomplete="off" spellcheck="false" autocapitalize="off"
+               autocomplete="off" spellcheck="false" autocapitalize="off"
                aria-describedby="input-hint" aria-invalid="false">
-        <p id="input-hint" class="hint" aria-live="polite">Usa un punto para los decimales.</p>
+        <p id="input-hint" class="hint" aria-live="polite">Usa punto decimal y escribe el período entre paréntesis, como 0.1(6).</p>
         <div class="examples" aria-label="Números de ejemplo">
           <span>Ejemplos</span>
           <button type="button" data-number="9999">9 999</button>
           <button type="button" data-number="10000">10 000</button>
           <button type="button" data-number="1200000034">Cero intermedio</button>
           <button type="button" data-number="-0.00000001">Fracción negativa</button>
+          <button type="button" data-number="0.(3)">1/3</button>
+          <button type="button" data-number="0.1(6)">1/6</button>
+          <button type="button" data-number="0.(142857)">1/7</button>
           <button type="button" data-number="31415926535897932384626433832795">32 cifras</button>
           <button type="button" data-number="3141592653589793238462643383279502884197169399375105820974944592">64 cifras</button>
         </div>
@@ -227,30 +245,99 @@
           <p>Entre otros bloques, conserva el lugar de cuatro ceros.</p>
         </div>
       </div>
+      <div id="period-key" class="reading-key" hidden>
+        <svg class="key-glyph" viewBox="0 0 40 48" aria-hidden="true">
+          <path d="M4 8H36 M13 15V40 M27 15V40" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        </svg>
+        <div>
+          <h2>La barra marca el período</h2>
+          <p>Todos los bloques bajo la barra se repiten en ese orden.</p>
+        </div>
+      </div>
     </section>
   </main>
   <script>
     "use strict";
 
     const svgNamespace = "http://www.w3.org/2000/svg";
-    const decimalPattern = /^([+-]?)([0-9]+)(?:\.([0-9]+))?$/;
+    const decimalPattern = /^([+-]?)([0-9]+)(?:\.([0-9]+)|\.([0-9]*)\(([0-9]+)\))?$/;
+    const inputHint = "Usa punto decimal y escribe el período entre paréntesis, como 0.1(6).";
     const primitives = [
       [0, 10, 20, 10], [0, 30, 20, 30], [0, 10, 20, 30], [20, 10, 0, 30], [20, 10, 20, 30],
     ];
     const digitStrokes = [[], [0], [1], [2], [3], [0, 3], [4], [4, 0], [4, 1], [4, 0, 1]];
     const reflections = [[1, 1, 0], [-1, 1, 0], [1, -1, 100], [-1, -1, 100]];
 
+    function digitBlocks(digits) {
+      return digits.match(/.{4}/g) || [];
+    }
+
+    function primitiveCycle(digits) {
+      const borderLengths = new Uint32Array(digits.length);
+      for (let i = 1, length = 0; i < digits.length; i++) {
+        while (length && digits[i] !== digits[length]) length = borderLengths[length - 1];
+        if (digits[i] === digits[length]) length++;
+        borderLengths[i] = length;
+      }
+      const candidate = digits.length - borderLengths[digits.length - 1];
+      return digits.length % candidate === 0 ? digits.slice(0, candidate) : digits;
+    }
+
+    function incrementDigits(digits) {
+      const lastNonNine = digits.search(/[0-8]9*$/);
+      if (lastNonNine === -1) return "1" + "0".repeat(digits.length);
+      return digits.slice(0, lastNonNine) + (Number(digits[lastNonNine]) + 1)
+        + "0".repeat(digits.length - lastNonNine - 1);
+    }
+
+    function cycleDigits(cycle, start, length) {
+      const end = start + length;
+      return cycle.repeat(Math.ceil(end / cycle.length)).slice(start, end);
+    }
+
+    function alignCycle(prefix, cycle) {
+      // Extend the recurring run backward over compatible prefix digits.
+      let length = prefix.length;
+      let phase = 0;
+      while (length) {
+        const previous = (phase + cycle.length - 1) % cycle.length;
+        if (prefix[length - 1] !== cycle[previous]) break;
+        length--;
+        phase = previous;
+      }
+
+      // The period must start and end on a node boundary.
+      const padding = (4 - length % 4) % 4;
+      const fraction = prefix.slice(0, length) + cycleDigits(cycle, phase, padding);
+      const start = (phase + padding) % cycle.length;
+      let periodLength = cycle.length;
+      while (periodLength % 4) periodLength += cycle.length;
+      return { fraction, periodBlocks: digitBlocks(cycleDigits(cycle, start, periodLength)) };
+    }
+
     function parseDecimal(raw) {
       const match = decimalPattern.exec(raw.trim());
       if (!match) return null;
 
-      const [, sign, integerDigits, fractionalDigits = ""] = match;
-      const integer = integerDigits.replace(/^0+/, "") || "0";
-      const fraction = fractionalDigits.replace(/0+$/, "");
-      const negative = sign === "-" && (integer !== "0" || fraction.length > 0);
-      const integerBlocks = integer.padStart(Math.ceil(integer.length / 4) * 4, "0").match(/.{4}/g);
-      const fractionalBlocks = fraction.padEnd(Math.ceil(fraction.length / 4) * 4, "0").match(/.{4}/g) || [];
-      return { negative, integer, fraction, integerBlocks, fractionalBlocks };
+      const [, sign, integerDigits, finite = "", prefix = "", recurring = ""] = match;
+      let integer = integerDigits.replace(/^0+/, "") || "0";
+      let fraction = recurring ? prefix : finite;
+      let periodBlocks = [];
+      const cycle = recurring ? primitiveCycle(recurring) : "";
+      if (cycle === "9") {
+        const incremented = incrementDigits(integer + fraction);
+        const boundary = incremented.length - fraction.length;
+        integer = incremented.slice(0, boundary);
+        fraction = incremented.slice(boundary);
+      } else if (cycle && cycle !== "0") {
+        ({ fraction, periodBlocks } = alignCycle(fraction, cycle));
+      }
+
+      if (!periodBlocks.length) fraction = fraction.replace(/0+$/, "");
+      const negative = sign === "-" && (integer !== "0" || fraction.length > 0 || periodBlocks.length > 0);
+      const integerBlocks = digitBlocks(integer.padStart(Math.ceil(integer.length / 4) * 4, "0"));
+      const fractionalBlocks = digitBlocks(fraction.padEnd(Math.ceil(fraction.length / 4) * 4, "0"));
+      return { negative, integer, fraction, integerBlocks, fractionalBlocks, periodBlocks };
     }
 
     function svgElement(name, attributes) {
@@ -306,15 +393,30 @@
     const flow = document.querySelector("#flow");
     const empty = document.querySelector("#empty");
     const toggle = document.querySelector("#decimal-toggle");
+    const periodKey = document.querySelector("#period-key");
+
+    function periodGroup(blocks) {
+      const group = document.createElement("div");
+      group.className = "period";
+      group.setAttribute("role", "group");
+      group.setAttribute("aria-label", `Período de ${blocks.length} ${blocks.length === 1 ? "bloque" : "bloques"}`);
+      blocks.forEach((block, index) => {
+        const open = index === 0 ? "(" : "";
+        const close = index === blocks.length - 1 ? ")" : "";
+        group.append(glyph(block, open + block + close));
+      });
+      return group;
+    }
 
     function render() {
       const value = parseDecimal(input.value);
       const invalid = !value && input.value.trim() !== "";
       input.setAttribute("aria-invalid", String(invalid));
       hint.classList.toggle("is-error", invalid);
-      hint.textContent = invalid ? "Escribe un entero o un decimal con punto, por ejemplo -12.34." : "Usa un punto para los decimales.";
+      hint.textContent = invalid ? "Escribe un número como -12.34 o 0.1(6)." : inputHint;
       empty.hidden = Boolean(value);
       flow.hidden = !value;
+      periodKey.hidden = !value?.periodBlocks.length;
       flow.replaceChildren();
       counts.textContent = "";
       if (!value) return;
@@ -322,15 +424,19 @@
       const row = document.createDocumentFragment();
       if (value.negative) row.append(separator(false));
       value.integerBlocks.forEach((block, index) => row.append(glyph(block, index === 0 ? block.replace(/^0+(?=[0-9])/, "") : block)));
-      if (value.fractionalBlocks.length) {
+      if (value.fractionalBlocks.length || value.periodBlocks.length) {
         row.append(separator(true));
         value.fractionalBlocks.forEach((block, index) => row.append(glyph(block, value.fraction.slice(index * 4, index * 4 + 4))));
+        if (value.periodBlocks.length) row.append(periodGroup(value.periodBlocks));
       }
       flow.append(row);
       stage.scrollLeft = 0;
-      const blocks = value.integerBlocks.length + value.fractionalBlocks.length;
+      const periodic = value.periodBlocks.length;
+      const blocks = value.integerBlocks.length + value.fractionalBlocks.length + periodic;
       const digits = value.integer.length + value.fraction.length;
-      counts.textContent = `${blocks} ${blocks === 1 ? "bloque" : "bloques"} · ${digits} ${digits === 1 ? "cifra" : "cifras"}`;
+      const detail = periodic ? `${periodic} ${periodic === 1 ? "bloque periódico" : "bloques periódicos"}`
+        : `${digits} ${digits === 1 ? "cifra" : "cifras"}`;
+      counts.textContent = `${blocks} ${blocks === 1 ? "bloque" : "bloques"} · ${detail}`;
     }
 
     input.addEventListener("input", render);

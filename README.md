@@ -1,6 +1,6 @@
 # Iteris
 
-Iteris extends a vertical form of Cistercian numerals into a spatial notation for signed finite decimals. Each node encodes four decimal positions. Nodes stack along a continuous stem, and a radix point marks the boundary between the integer and fractional chains.
+Iteris extends a vertical form of Cistercian numerals into a spatial notation for signed decimals. Each node encodes four decimal positions. A radix point separates the integer and fractional nodes, and the horizontal prototype uses an overbar for repeating blocks.
 
 **Status** · Work in progress. Core v1.0 is a draft.  
 **Author** · Patricio M. Vera, simbionte.org
@@ -21,7 +21,7 @@ Earlier specifications record how the design developed. [Notation v0.2](docs/his
 
 ## Horizontal writing demo
 
-Download the demo file and open it in a browser. It draws the same Core glyphs in a left-to-right row with decimal digits grouped in fours below. The page works offline and includes signed fractions, zero blocks, and examples with up to 64 digits. [Self-contained demo](demo/index.html)
+Download the demo file and open it in a browser. It draws the same Core glyphs in a left-to-right row with decimal digits grouped in fours below. For a recurring decimal, enter a period in parentheses, as in `0.1(6)`. A bar marks the repeating blocks. The page works offline and includes signed fractions, zero blocks, and examples with up to 64 digits. [Self-contained demo](demo/index.html)
 
 ![Horizontal Iteris for an integer with a zero block and a negative fraction](docs/assets/iteris_horizontal_preview.png)
 
