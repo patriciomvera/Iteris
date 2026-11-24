@@ -19,6 +19,12 @@ David A. King documents the manuscripts, instruments, and later uses of the nota
 
 Earlier specifications record how the design developed. [Notation v0.2](docs/history/ITERIS_NOTATION_02.md) · [Exploratory specification v0.5](docs/history/ITERIS_SPEC_v05.md) · [Specification archive](docs/history/)
 
+## Horizontal writing demo
+
+Download the demo file and open it in a browser. It draws the same Core glyphs in a left-to-right row with decimal digits grouped in fours below. The page works offline and includes signed fractions, zero blocks, and examples with up to 64 digits. [Self-contained demo](demo/index.html)
+
+![Horizontal Iteris for an integer with a zero block and a negative fraction](docs/assets/iteris_horizontal_preview.png)
+
 ## Run the reference implementation
 
 From the repository root, use Python 3.9 or later. The reference implementation uses the standard library. [Python package](iteris/) · [Tests](tests/)
