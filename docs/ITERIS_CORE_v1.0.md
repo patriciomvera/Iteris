@@ -3,7 +3,7 @@
 **Status** · Draft for review  
 **Author** · Patricio M. Vera, simbionte.org
 
-This draft builds on [Notation v0.2](ITERIS_NOTATION_02.md) and Gemini's consolidation of the quadrant geometry, parser, and validation examples. Iteris uses a vertical convention of the [Cistercian numerals](https://mathworld.wolfram.com/CistercianNumerals.html) to write each block of four decimal digits as a single spatial glyph. A continuous stem connects the blocks of each chain.
+This draft builds on Notation v0.2 and Gemini's consolidation of the quadrant geometry, parser, and validation examples. Iteris uses a vertical Cistercian convention to write each block of four decimal digits as a single spatial glyph. A continuous stem connects the blocks of each chain. [Notation v0.2](history/ITERIS_NOTATION_02.md) · [Cistercian numerals](https://mathworld.wolfram.com/CistercianNumerals.html)
 
 ## Values and node order
 
@@ -24,7 +24,7 @@ For uniqueness, two equal representations can be compared at the same precision 
 
 After trimming surrounding whitespace, the encoder accepts `[+-]?[0-9]+(?:\.[0-9]+)?`. Strip leading integer zeros and retain one digit for an empty integer part after stripping. Strip trailing fractional zeros. Right-align the integer digits and left-align the fractional digits into four-digit blocks, padding the exposed ends with zeros. Normalize signed zero to positive. Padding carries no precision metadata.
 
-To decode, write the first integer node in decimal and pad every subsequent integer node to four digits. Pad every fractional node to four digits before joining them, then strip trailing zeros from the joined fraction. Include the radix point when a fractional part remains and the minus sign on a negative value. The [Python codec](iteris_core.py) implements these steps and validates manually constructed nodes and chains.
+To decode, write the first integer node in decimal and pad every subsequent integer node to four digits. Pad every fractional node to four digits before joining them, then strip trailing zeros from the joined fraction. Include the radix point when a fractional part remains and the minus sign on a negative value. The reference implementation performs these steps and validates manually constructed nodes and chains. [Python codec](../iteris/core.py)
 
 | Input | Integer nodes | Fractional nodes | Canonical decimal |
 | --- | --- | --- | --- |
@@ -64,7 +64,7 @@ A node has height $H$, with the stem at $x=0$ from $y=0$ to $y=H$. Coordinates g
 | 3 | `p3` | 8 | `p2 p6` |
 | 4 | `p4` | 9 | `p1 p2 p6` |
 
-Each chain has one continuous stem of length $H$ times its node count. The integer and fractional stems start at the same height on axes $x=0$ and $x=4W$. When a fractional chain exists, the radix dot is centered at $(2W,H/2)$ with radius $H/40$. The minus sign is centered at $(-2W,H/2)$ and has length $3H/25$. The [reference chart](iteris_reference.svg) shows all 36 nonzero digit placements and examples with empty blocks.
+Each chain has one continuous stem of length $H$ times its node count. The integer and fractional stems start at the same height on axes $x=0$ and $x=4W$. When a fractional chain exists, the radix dot is centered at $(2W,H/2)$ with radius $H/40$. The minus sign is centered at $(-2W,H/2)$ and has length $3H/25$. The reference chart shows all 36 nonzero digit placements and examples with empty blocks. [Reference chart](assets/iteris_reference.svg)
 
 Every nonzero digit contributes a segment reaching distance $W$ from its stem. For ideal vector geometry under uniform scaling, the lateral distance yields $H$ on any chain with a nonzero node. Its stem length then yields the node count, including all blank positions. A bare integer stem is the canonical zero integer part. Reading accuracy at finite display sizes is an empirical question.
 

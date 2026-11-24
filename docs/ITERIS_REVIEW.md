@@ -1,6 +1,6 @@
 # Review of Gemini’s Iteris proposals
 
-[Project overview](README.md) · [Notation v0.2](ITERIS_NOTATION_02.md) · [Exploratory specification v0.5](ITERIS_SPEC_v05.md)
+[Project overview](../README.md) · [Notation v0.2](history/ITERIS_NOTATION_02.md) · [Exploratory specification v0.5](history/ITERIS_SPEC_v05.md)
 
 ## Positional core
 

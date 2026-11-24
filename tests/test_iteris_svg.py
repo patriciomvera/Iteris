@@ -3,8 +3,8 @@ import unittest
 from pathlib import Path
 from xml.etree import ElementTree
 
-from iteris_core import encode_iteris
-from iteris_svg import render_reference_svg, render_svg
+from iteris import encode_iteris
+from iteris.svg import render_reference_svg, render_svg
 
 
 _SVG = "{http://www.w3.org/2000/svg}"
@@ -49,7 +49,8 @@ class IterisSvgTests(unittest.TestCase):
         self.assertEqual((dot.attrib["cx"], dot.attrib["cy"]), ("40", "50"))
 
     def test_checked_in_reference_matches_renderer(self):
-        chart = Path(__file__).with_name("iteris_reference.svg").read_text(encoding="utf-8")
+        reference = Path(__file__).resolve().parents[1] / "docs" / "assets" / "iteris_reference.svg"
+        chart = reference.read_text(encoding="utf-8")
         self.assertEqual(chart, render_reference_svg())
         root = ElementTree.fromstring(chart)
         placements = [

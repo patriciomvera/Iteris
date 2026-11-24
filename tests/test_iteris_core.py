@@ -4,7 +4,7 @@ from fractions import Fraction
 from random import Random
 import unittest
 
-from iteris_core import IterisNode, IterisNumber, decode_iteris, encode_iteris
+from iteris import IterisNode, IterisNumber, decode_iteris, encode_iteris
 
 
 class IterisCodecTests(unittest.TestCase):

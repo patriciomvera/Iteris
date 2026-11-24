@@ -1,28 +1,40 @@
-## Iteris
+# Iteris
 
-Iteris is a spatial numeral notation inspired by Cistercian numerals. It writes signed finite decimals in base 10,000, with four decimal positions in each node and a continuous stem for each chain.
+Iteris extends a vertical form of Cistercian numerals into a spatial notation for signed finite decimals. Each node encodes four decimal positions. Nodes stack along a continuous stem, and a radix point marks the boundary between the integer and fractional chains.
 
-**Status** · Private work in progress  
+**Status** · Work in progress. Core v1.0 is a draft.  
 **Author** · Patricio M. Vera, simbionte.org
 
-- [Core v1.0 draft](ITERIS_CORE_v1.0.md) defines canonical decimal conversion and the reference geometry.
-- [Review of Gemini's proposals](ITERIS_REVIEW.md) records what the core adopts and the open questions for Extended and Quantum.
-- [Notation v0.2](ITERIS_NOTATION_02.md) and [exploratory v0.5](ITERIS_SPEC_v05.md) record the earlier design.
+## Cistercian origins
 
-The Python reference uses the standard library and runs on Python 3.9 or later.
+Cistercian numerals are documented in medieval manuscripts by the late thirteenth century. Scribes used them for folio numbers, indexes, and subdivisions of texts. In the notation described here, one compound glyph encodes any positive integer from 1 to 9,999 by placing strokes for units, tens, hundreds, and thousands around a shared stem. Historical forms varied in how they drew the strokes and placed the digits, and used both horizontal and vertical stems. [Miller's historical survey](https://www.unicode.org/L2/L2020/20290-cistercian-digits.pdf) · [MathWorld's geometric reference](https://mathworld.wolfram.com/CistercianNumerals.html)
+
+David A. King documents the manuscripts, instruments, and later uses of the notation in *The Ciphers of the Monks: A Forgotten Number-Notation of the Middle Ages* (Franz Steiner, 2001). The earlier Cistercian demo includes a converter and an interactive glyph reference. [King's book in the BnF catalogue](https://catalogue.bnf.fr/ark:/12148/cb39031496f) · [Cistercian demo repository](https://github.com/patriciomvera/Cistercian)
+
+## Where Iteris is going
+
+1. **Specify the positional core.** Define how a base-10,000 chain records sign, zero blocks, and finite fractions. The Python codec and SVG renderer provide executable examples. [Core v1.0 draft](docs/ITERIS_CORE_v1.0.md)
+2. **Test how people read it.** Compare exact transcription and reading time with decimal digits grouped in fours, especially when blank segments carry place value. [Reference chart](docs/assets/iteris_reference.svg)
+3. **Explore other interpretations.** Give recursive expressions explicit syntax and test whether radial layouts preserve node order. The work on modular parity, qudit phase, and circuit depth has its own open questions and experiments. [Review of Gemini's proposals](docs/ITERIS_REVIEW.md)
+
+Earlier specifications record how the design developed. [Notation v0.2](docs/history/ITERIS_NOTATION_02.md) · [Exploratory specification v0.5](docs/history/ITERIS_SPEC_v05.md) · [Specification archive](docs/history/)
+
+## Run the reference implementation
+
+From the repository root, use Python 3.9 or later. The reference implementation uses the standard library. [Python package](iteris/) · [Tests](tests/)
 
 ```sh
 python -m unittest discover -v
-python iteris_svg.py 100000005 > numeral.svg
-python iteris_svg.py --reference > iteris_reference.svg
+python -m iteris.svg 100000005 > numeral.svg
+python -m iteris.svg --reference > docs/assets/iteris_reference.svg
 ```
 
 ```python
-from iteris_core import decode_iteris, encode_iteris
+from iteris import decode_iteris, encode_iteris
 
 number = encode_iteris("0.00000001")
 assert [node.value for node in number.frac_nodes] == [0, 1]
 assert decode_iteris(number) == "0.00000001"
 ```
 
-![Iteris digit reference and comparison of five numbers with grouped decimal notation](iteris_reference.svg)
+![Iteris digit reference and five examples of numbers with zero blocks](docs/assets/iteris_reference.svg)

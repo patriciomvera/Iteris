@@ -3,7 +3,7 @@
 import argparse
 from xml.sax.saxutils import escape
 
-from iteris_core import IterisNode, IterisNumber, decode_iteris, encode_iteris
+from .core import IterisNode, IterisNumber, decode_iteris, encode_iteris
 
 
 NODE_HEIGHT = 100
