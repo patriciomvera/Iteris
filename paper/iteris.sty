@@ -1,0 +1,135 @@
+\NeedsTeXFormat{LaTeX2e}[2020/10/01]
+\ProvidesPackage{iteris}[2026/11/24 v0.1 Iteris numeral macros]
+\RequirePackage{tikz}
+
+% Iteris Core horizontal geometry in units of H/100. The TeX layer renders
+% already canonical fractional blocks; the integer input is grouped here.
+\ExplSyntaxOn
+\int_new:N \l__iteris_x_int
+\int_new:N \l__iteris_stem_int
+\int_new:N \l__iteris_sx_int
+\int_new:N \l__iteris_sy_int
+\int_new:N \l__iteris_y_int
+\int_new:N \l__iteris_period_x_int
+\tl_new:N \l__iteris_integer_tl
+\seq_new:N \l__iteris_integer_seq
+
+\cs_new_protected:Npn \__iteris_stroke:nnnn #1#2#3#4
+  {
+    \draw
+      ( \int_eval:n { \l__iteris_stem_int + \l__iteris_sx_int * #1 },
+        \int_eval:n { \l__iteris_y_int + \l__iteris_sy_int * #2 } )
+      --
+      ( \int_eval:n { \l__iteris_stem_int + \l__iteris_sx_int * #3 },
+        \int_eval:n { \l__iteris_y_int + \l__iteris_sy_int * #4 } );
+  }
+\cs_new_protected:Npn \__iteris_outer: { \__iteris_stroke:nnnn {0}{10}{20}{10} }
+\cs_new_protected:Npn \__iteris_inner: { \__iteris_stroke:nnnn {0}{30}{20}{30} }
+\cs_new_protected:Npn \__iteris_fall: { \__iteris_stroke:nnnn {0}{10}{20}{30} }
+\cs_new_protected:Npn \__iteris_rise: { \__iteris_stroke:nnnn {20}{10}{0}{30} }
+\cs_new_protected:Npn \__iteris_side: { \__iteris_stroke:nnnn {20}{10}{20}{30} }
+
+\cs_new_protected:Npn \__iteris_quadrant:nnnn #1#2#3#4
+  {
+    \int_set:Nn \l__iteris_sx_int {#2}
+    \int_set:Nn \l__iteris_sy_int {#3}
+    \int_set:Nn \l__iteris_y_int {#4}
+    \int_case:nn {#1}
+      {
+        {1}{\__iteris_outer:}
+        {2}{\__iteris_inner:}
+        {3}{\__iteris_fall:}
+        {4}{\__iteris_rise:}
+        {5}{\__iteris_outer: \__iteris_rise:}
+        {6}{\__iteris_side:}
+        {7}{\__iteris_outer: \__iteris_side:}
+        {8}{\__iteris_inner: \__iteris_side:}
+        {9}{\__iteris_outer: \__iteris_inner: \__iteris_side:}
+      }
+  }
+
+\msg_new:nnn {iteris}{bad-integer}
+  { Expected~one~or~more~ASCII~digits~as~the~integer~argument. }
+\msg_new:nnn {iteris}{bad-block}
+  { Expected~a~fractional~block~containing~exactly~four~ASCII~digits. }
+
+\cs_new_protected:Npn \__iteris_node:n #1
+  {
+    \regex_match:nnTF { \A [0-9]{4} \Z } {#1}
+      {
+        \int_set:Nn \l__iteris_stem_int { \l__iteris_x_int + 30 }
+        \draw (\int_use:N \l__iteris_stem_int,0)
+           -- (\int_use:N \l__iteris_stem_int,100);
+        \__iteris_quadrant:nnnn { \tl_item:nn {#1}{4} } { 1}{ 1}{0}
+        \__iteris_quadrant:nnnn { \tl_item:nn {#1}{3} } {-1}{ 1}{0}
+        \__iteris_quadrant:nnnn { \tl_item:nn {#1}{2} } { 1}{-1}{100}
+        \__iteris_quadrant:nnnn { \tl_item:nn {#1}{1} } {-1}{-1}{100}
+        \int_add:Nn \l__iteris_x_int {60}
+      }
+      { \msg_error:nn {iteris}{bad-block} }
+  }
+
+\cs_new_protected:Npn \__iteris_integer:n #1
+  {
+    \regex_match:nnTF { \A [0-9]+ \Z } {#1}
+      {
+        \tl_set:Nn \l__iteris_integer_tl {#1}
+        \regex_replace_once:nnN { \A 0+ } {} \l__iteris_integer_tl
+        \tl_if_empty:NT \l__iteris_integer_tl
+          { \tl_set:Nn \l__iteris_integer_tl {0} }
+        \tl_set:Nx \l__iteris_integer_tl
+          {
+            \prg_replicate:nn
+              { \int_mod:nn { 4 - \int_mod:nn { \tl_count:N \l__iteris_integer_tl }{4} }{4} } {0}
+            \exp_not:V \l__iteris_integer_tl
+          }
+        \exp_args:NnV \regex_extract_all:nnN { [0-9]{4} }
+          \l__iteris_integer_tl \l__iteris_integer_seq
+        \seq_map_function:NN \l__iteris_integer_seq \__iteris_node:n
+      }
+      { \msg_error:nn {iteris}{bad-integer} }
+  }
+
+\cs_new_protected:Npn \__iteris_picture:nnnn #1#2#3#4
+  {
+    \begin{tikzpicture}
+      [x=#4,y=-#4,baseline={\dim_eval:n { - #4 * 75 }},
+       line~width={\dim_eval:n {#4 * 2}}]
+      \int_zero:N \l__iteris_x_int
+      \__iteris_integer:n {#1}
+      \tl_if_blank:nF {#2#3}
+        {
+          \fill ( \int_eval:n { \l__iteris_x_int + 10 },50 )
+            circle[radius={\dim_eval:n {#4 * 5 / 2}}];
+          \int_add:Nn \l__iteris_x_int {20}
+        }
+      \clist_map_function:nN {#2} \__iteris_node:n
+      \int_set:Nn \l__iteris_period_x_int { \l__iteris_x_int + 10 }
+      \clist_map_function:nN {#3} \__iteris_node:n
+      \tl_if_blank:nF {#3}
+        {
+          \draw (\int_use:N \l__iteris_period_x_int,-10)
+             -- (\int_eval:n { \l__iteris_x_int - 10 },-10);
+        }
+      \path (0,0) rectangle (\int_use:N \l__iteris_x_int,100);
+    \end{tikzpicture}
+  }
+
+\cs_new_protected:Npn \__iteris_math:nnn #1#2#3
+  {
+    \ensuremath{
+      \mathord{
+        \mathchoice
+          {\__iteris_picture:nnnn{#1}{#2}{#3}{0.10pt}}
+          {\__iteris_picture:nnnn{#1}{#2}{#3}{0.10pt}}
+          {\__iteris_picture:nnnn{#1}{#2}{#3}{0.07pt}}
+          {\__iteris_picture:nnnn{#1}{#2}{#3}{0.05pt}}
+      }
+    }
+  }
+
+\NewDocumentCommand \Iteris {m} { \__iteris_math:nnn {#1}{}{} }
+\NewDocumentCommand \IterisDecimal {mm} { \__iteris_math:nnn {#1}{#2}{} }
+\NewDocumentCommand \IterisPeriodic {mmm} { \__iteris_math:nnn {#1}{#2}{#3} }
+\ExplSyntaxOff
+\endinput
