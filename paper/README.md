@@ -15,3 +15,25 @@ and 10,016 for the optimal cyclic order.
 
 The manuscript source uses `iteris.sty` to render its examples.
 Keep the style file next to `main.tex` when compiling the manuscript.
+
+## Lean 4 checks
+
+The two standalone files use Lean 4 and require no Mathlib.
+
+- [IterisChecksV02.lean](IterisChecksV02.lean) covers the digit graph,
+  carry costs, example rational expansions, and a traversal of all
+  10,000 nodes.
+- [IterisChecksExtra.lean](IterisChecksExtra.lean) adds parity counts,
+  total counting cost, and period-length checks over finite ranges.
+
+From the repository root, run both files with an available Lean 4
+toolchain.
+
+```sh
+lean paper/IterisChecksV02.lean
+lean paper/IterisChecksExtra.lean
+```
+
+These files specify finite checks. The manuscript supplies the general
+proofs. The numerical results were checked independently, and
+verification with the Lean 4 compiler is pending.
