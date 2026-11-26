@@ -3,18 +3,13 @@ import Lean
 /-!
 Additional finite checks for "Rational Numerals and Carry Geometry in Iteris".
 
-This file is self-contained: the four base definitions are repeated from
-`IterisChecks.lean`, under a separate namespace so both files can coexist.
-
-STATUS: written without access to a Lean toolchain. Every definition below has
-a line-by-line Python mirror in `iteris_extra_checks.py`, which passes, so the
-stated values are right; what has not been confirmed is that this file
-elaborates as written on your Lean version.
+This file is self-contained and shares the base definitions from
+`IterisChecksV02.lean`. It uses a separate namespace so both files can coexist.
 -/
 
 namespace IterisExtra
 
-/-! ## Base definitions (as in IterisChecks.lean) -/
+/-! ## Base definitions (as in IterisChecksV02.lean) -/
 
 /-- Bits encode the strokes p1, p2, p3, p4, and p6, in that order. -/
 def digitMask : Nat -> Nat
