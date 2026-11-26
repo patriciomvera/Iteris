@@ -18,7 +18,8 @@ Keep the style file next to `main.tex` when compiling the manuscript.
 
 ## Lean 4 checks
 
-The two standalone files use Lean 4 and require no Mathlib.
+The two standalone files were checked with Lean 4.36.0.
+They require no Mathlib.
 
 - [IterisChecksV02.lean](IterisChecksV02.lean) covers the digit graph,
   carry costs, example rational expansions, and a traversal of all
@@ -35,5 +36,4 @@ lean paper/IterisChecksExtra.lean
 ```
 
 These files specify finite checks. The manuscript supplies the general
-proofs. The numerical results were checked independently, and
-verification with the Lean 4 compiler is pending.
+proofs. The numerical results were also checked independently.
