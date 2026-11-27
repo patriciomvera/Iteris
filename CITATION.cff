@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite the paper below."
+title: "Iteris"
+type: software
+authors:
+  - family-names: Vera
+    given-names: Patricio M.
+    orcid: "https://orcid.org/0009-0004-5384-5952"
+repository-code: "https://github.com/patriciomvera/Iteris"
+url: "https://simbionte.org/research"
+preferred-citation:
+  type: article
+  title: "Rational Numerals and Carry Geometry in Iteris"
+  authors:
+    - family-names: Vera
+      given-names: Patricio M.
+      orcid: "https://orcid.org/0009-0004-5384-5952"
+  year: 2026
+  publisher:
+    name: Zenodo
+  doi: "10.5281/zenodo.24569612"
+  url: "https://doi.org/10.5281/zenodo.24569612"

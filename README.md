@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24569612.svg)](https://doi.org/10.5281/zenodo.24569612)
+
 # Iteris
 
 Iteris extends a vertical form of Cistercian numerals into a spatial notation for signed decimals. Each node encodes four decimal positions. A radix point separates the integer and fractional nodes, and the horizontal prototype uses an overbar for repeating blocks.
@@ -46,3 +48,10 @@ assert decode_iteris(number) == "0.00000001"
 When the glyph or layout rules change, regenerate the reference SVG and run the tests. The suite compares the checked-in chart with the renderer output. [Reference layout](docs/ITERIS_CORE_v1.0.md#horizontal-reference-layout)
 
 ![Iteris digit reference, horizontal numerals, periodic decimals, and formula examples](docs/assets/iteris_reference.svg)
+
+## How to cite
+
+Vera, P. M. (2026). *Rational Numerals and Carry Geometry in Iteris*. Zenodo.
+https://doi.org/10.5281/zenodo.24569612 · Also on Hexagon: hexagon:2611.01089v1
+
+GitHub's "Cite this repository" button gives the same reference in APA and BibTeX.
